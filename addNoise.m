@@ -2,7 +2,18 @@
 
 function noisyFrame = addNoise(frame, noiseType, params)
 
-    switch noiseType
+    if nargin < 3
+        params = struct();
+    end
+
+    if ~isa(frame, 'uint8')
+        frame = im2uint8(frame);
+    end
+
+    switch lower(noiseType)
+        case 'withoutnoise'
+            noisyFrame = frame;
+
         case 'gaussian'
             noisyFrame = imnoise(frame, 'gaussian', params.mean, params.variance);
 
@@ -12,12 +23,14 @@ function noisyFrame = addNoise(frame, noiseType, params)
         case 'speckle'
             noisyFrame = imnoise(frame, 'speckle', params.variance);
 
+        otherwise
+            error('Unknown noise type: %s', noiseType);
     end
 end
 
 %{
 
-videoReader = VideoReader("dataset\videos\processed\highwayDashedLeftLine.mp4");
+videoReader = VideoReader("video_assets\processed\highwayDashedLeftLine.mp4");
 
 noiseParams.mean = 0;
 noiseParams.variance = 0.01;
