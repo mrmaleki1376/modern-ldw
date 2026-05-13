@@ -1,22 +1,55 @@
 % Read video
 videoObj = VideoReader('video_assets\processed\highwayDashedLeftLine.mp4');
 
-% Create figure
-figure;
+% Create large fullscreen figure
+figure('Units','normalized','OuterPosition',[0 0 1 1]);
 
-% Read and display frames
 while hasFrame(videoObj)
+
     frame = readFrame(videoObj);
 
     noiseParams.mean = 0;
-    noiseParams.variance = 0.01;
-    noiseParams.density = 0.1;
-    
-    noisyFrame = addNoise(frame, 'gaussian',noiseParams);
+    noiseParams.variance = 0.001;
+    noiseParams.density = 0.01;
 
+    noisyFrame = addNoise(frame, 'gaussian', noiseParams);
+
+    [leftRho, leftTheta, rightRho, rightTheta, ...
+     leftXBottom, leftYBottom, leftXTop, leftYTop, ...
+     rightXBottom, rightYBottom, rightXTop, rightYTop, ...
+     smoothImg, maskedEdges, roiImg, roiTopY] = detectLane(noisyFrame);
+
+    clf;
+
+    % Compact layout
+    t = tiledlayout(2,3, ...
+        'TileSpacing','compact', ...
+        'Padding','compact');
+
+    % Original frame
+    nexttile;
+    imshow(frame);
+    title('Original Frame');
+
+    % Noisy frame
+    nexttile;
     imshow(noisyFrame);
+    title('Noisy Frame');
 
-    title('Video Playback');
+    % Smooth image
+    nexttile;
+    imshow(smoothImg, []);
+    title('Smooth Image');
+
+    % Masked edges
+    nexttile;
+    imshow(maskedEdges, []);
+    title('Masked Edges');
+
+    % ROI image
+    nexttile([1 2]);   % make ROI image larger
+    imshow(roiImg);
+    title('ROI Image');
 
     drawnow;
 end
