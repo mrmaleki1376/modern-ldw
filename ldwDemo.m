@@ -8,10 +8,7 @@ while hasFrame(videoObj)
 
     frame = readFrame(videoObj);
 
-    noiseParams.mean = 0;
-    noiseParams.variance = 0.001;
-    noiseParams.density = 0.01;
-
+    noiseParams = load('noiseParams.mat').noiseParams;
     noisyFrame = addNoise(frame, 'gaussian', noiseParams);
 
     [leftRho, leftTheta, rightRho, rightTheta, ...
