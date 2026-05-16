@@ -1,5 +1,5 @@
 % Read video
-videoObj = VideoReader('video_assets\processed\highwayDashedLeftLine.mp4');
+videoObj = VideoReader('video_assets\raw\downloaded_highway_02.MOV');
 
 % Create large fullscreen figure
 figure('Units','normalized','OuterPosition',[0 0 1 1]);
@@ -16,10 +16,27 @@ while hasFrame(videoObj)
      rightXBottom, rightYBottom, rightXTop, rightYTop, ...
      smoothImg, maskedEdges, roiImg, roiTopY] = detectLane(noisyFrame);
 
+    % Create a separate image to draw detected lane lines
+    laneLinesImg = frame;
+
+    % Draw left lane line
+    if ~isnan(leftXBottom) && ~isnan(leftXTop)
+        laneLinesImg = insertShape(frame, 'Line', ...
+            [leftXBottom leftYBottom leftXTop leftYTop], ...
+            'Color', 'green', 'LineWidth', 5);
+    end
+
+    % Draw right lane line
+    if ~isnan(rightXBottom) && ~isnan(rightXTop)
+        laneLinesImg = insertShape(laneLinesImg, 'Line', ...
+            [rightXBottom rightYBottom rightXTop rightYTop], ...
+            'Color', 'red', 'LineWidth', 5);
+    end
+
     clf;
 
-    % Compact layout
-    t = tiledlayout(2,3, ...
+    % Updated layout (2x4)
+    t = tiledlayout(2,4, ...
         'TileSpacing','compact', ...
         'Padding','compact');
 
@@ -44,9 +61,14 @@ while hasFrame(videoObj)
     title('Masked Edges');
 
     % ROI image
-    nexttile([1 2]);   % make ROI image larger
+    nexttile;
     imshow(roiImg);
     title('ROI Image');
+
+    % Lane lines image
+    nexttile;
+    imshow(laneLinesImg);
+    title('Detected Lane Lines');
 
     drawnow;
 end
