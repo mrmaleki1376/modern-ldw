@@ -5,10 +5,13 @@ videoObj = VideoReader('video_assets\raw\downloaded_highway_01.MOV');
 % Create large fullscreen figure
 figure('Units','normalized','OuterPosition',[0 0 1 1]);
 
-while hasFrame(videoObj)
+lorThresh = 0.3;
 
-    % Read current frame
+while hasFrame(videoObj)
+    
+    % Read current frame and get the image width and height
     frame = readFrame(videoObj);
+    [heightFrame, widthFrame, channels] = size(frame);
 
     % Load noise parameters and add Gaussian noise
     noiseParams = load('noiseParams.mat').noiseParams;
@@ -40,7 +43,7 @@ while hasFrame(videoObj)
     end
 
     % Calculate LOR
-    lor = calcLOR(leftXBottom, rightXBottom, 0.3, 1920/2);
+    lor = calcLOR(leftXBottom, rightXBottom, lorThresh, widthFrame/2);
 
     % Add LOR text on image
     laneLinesImg = insertText(laneLinesImg, ...
