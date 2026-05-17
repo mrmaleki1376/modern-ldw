@@ -54,7 +54,7 @@ The system evaluates the LOR value to determine whether a **Lane Departure Warni
 
 | LOR Value | Identification | Description |
 |---|---|---|
-| `0.25` | No Lane Departure | Vehicle is traveling exactly at the center of the lane |
+| `LOR > 0.25` | No Lane Departure | Vehicle is traveling exactly at the center of the lane |
 | `0 < LOR < 0.25` | No Lane Departure | Vehicle is off-center but still within the safe zone |
 | `LOR = 0` | Lane Departure | Vehicle is exactly crossing the warning threshold |
 | `-1 < LOR < 0` | Lane Departure | Vehicle is between the warning threshold and the lane boundary |
@@ -62,39 +62,3 @@ The system evaluates the LOR value to determine whether a **Lane Departure Warni
 
 ---
 
-# Operational Challenges
-
-Although the LOR method performs effectively in both daytime and night-time environments, its accuracy strongly depends on the quality of the lane detection stage.
-
-Performance may deteriorate because of:
-
-- Worn or occluded lane markings leading to inaccurate X-coordinate detection
-- Low illumination during night driving or heavy rain conditions
-- Environmental disturbances such as:
-  - road arrow signs
-  - tree shadows
-  - false positives from neighboring vehicles
-
----
-
-# Advantages of LOR-Based LDW Systems
-
-- No camera calibration required
-- Computationally lightweight
-- Suitable for real-time embedded systems
-- Effective in daytime and night-time scenarios
-- Simple mathematical interpretation
-
----
-
-# Applications
-
-LOR-based lane departure systems are commonly used in:
-
-- Advanced Driver Assistance Systems (ADAS)
-- Autonomous driving research
-- Vision-based vehicle safety systems
-- Embedded automotive platforms
-- Real-time lane monitoring applications
-
----
