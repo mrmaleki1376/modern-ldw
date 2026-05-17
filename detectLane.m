@@ -69,20 +69,25 @@ function [leftRho, leftTheta, rightRho, rightTheta, ...
     end
 
     function [smoothed, edges] = preprocessImage(img)
-        smoothed = imgaussfilt(img, 0.2);
-        edges = edge(smoothed, 'canny', [0.3, 0.5]);
+        smoothed = imgaussfilt(img, 0.8);
+        edges = edge(smoothed, 'canny', [0.2, 0.6]);
+        %        edges = edge(smoothed, 'canny', [0.2, 0.6]);
+
     end
 
     function [mask, topY] = createRoiMask(imgSize)
     h = imgSize(1); w = imgSize(2);
     topY = round(0.55 * h);   % keep vertical height unchanged
     
-    % Move left and right edges inward (narrow the ROI)
+    % bottomLeftX  = w * 0.3;   % 
+    % bottomRightX = w * 0.7;   
+    % topLeftX     = w * 0.35;  %
+    % topRightX    = w * 0.65;
+    %For Urban
     bottomLeftX  = w * 0.2;   % 
     bottomRightX = w * 0.8;   
-    topLeftX     = w * 0.35;  %
-    topRightX    = w * 0.65;  
-    
+    topLeftX     = w * 0.4;  %
+    topRightX    = w * 0.6;  
     pts = [bottomLeftX, h; bottomRightX, h; topRightX, topY; topLeftX, topY];
     mask = poly2mask(pts(:,1), pts(:,2), h, w);
     end
@@ -103,42 +108,23 @@ function [leftRho, leftTheta, rightRho, rightTheta, ...
     end
 
     function [lRho, lTheta, rRho, rTheta] = selectLaneLines(rhoAll, thetaAll, topY)
-        lMask = thetaAll < 0; rMask = thetaAll > 0;
-        % left
+    % Left lane: average ALL candidates with theta < 0
+        lMask = thetaAll < 0;
         if any(lMask)
-            lcR = rhoAll(lMask); lcT = thetaAll(lMask);
-            [~,idx] = min(abs(lcR));
-            lRho = lcR(idx); lTheta = lcT(idx);
-        else; lRho = NaN; lTheta = NaN; end
-        % right
-        rRho = NaN; rTheta = NaN;
-        if any(rMask)
-            rcR = rhoAll(rMask); rcT = thetaAll(rMask);
-            if ~isnan(lRho)
-                lr = deg2rad(lTheta); lc = cos(lr); ls = sin(lr);
-                bestIdx=1; bestYd=inf;
-                for i=1:length(rcR)
-                    rr = deg2rad(rcT(i));
-                    A = [lc, ls; cos(rr), sin(rr)];
-                    b = [lRho; rcR(i)];
-                    inter = A\b;
-                    yInter = inter(2);
-                    if yInter >= topY
-                        yd = abs(yInter - topY);
-                        if yd < bestYd; bestYd=yd; bestIdx=i; end
-                    end
-                end
-                if bestYd<inf
-                    rRho = rcR(bestIdx); rTheta = rcT(bestIdx);
-                else
-                    [~,idx] = min(abs(rcR));
-                    rRho = rcR(idx); rTheta = rcT(idx);
-                end
-            else
-                [~,idx] = min(abs(rcR));
-                rRho = rcR(idx); rTheta = rcT(idx);
-            end
+            lRho = mean(rhoAll(lMask));
+            lTheta = mean(thetaAll(lMask));
+        else
+            lRho = NaN; lTheta = NaN;
         end
+
+        % Right lane: average ALL candidates with theta > 0
+        rMask = thetaAll > 0;
+        if any(rMask)
+            rRho = mean(rhoAll(rMask));
+            rTheta = mean(thetaAll(rMask));
+        else
+            rRho = NaN; rTheta = NaN;
+        end
+       
     end
 end % detectLane
-
